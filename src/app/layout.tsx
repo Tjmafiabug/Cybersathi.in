@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/landing/navbar";
+import { Footer } from "@/components/landing/footer";
 
 export const metadata: Metadata = {
   title: "CyberSathi — Cyber crime awareness and alerts",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Navbar />
         <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );
