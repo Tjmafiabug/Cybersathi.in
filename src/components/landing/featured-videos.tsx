@@ -80,7 +80,7 @@ export function FeaturedVideos() {
   const [featured, ...rest] = featuredVideos;
 
   return (
-    <section className="bg-muted/30 py-20 md:py-28">
+    <section className="bg-muted/30 pt-10 pb-20 md:pt-12 md:pb-28">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">

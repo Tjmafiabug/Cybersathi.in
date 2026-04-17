@@ -98,7 +98,7 @@ const recentNews: NewsItem[] = [
 
 export function BlogsAndNews() {
   return (
-    <section className="container mx-auto px-4 py-20 md:py-28">
+    <section className="container mx-auto px-4 pt-20 pb-10 md:pt-28 md:pb-12">
       <div className="grid gap-10 lg:grid-cols-5 lg:gap-12">
         <div className="lg:col-span-3">
           <div className="mb-6 flex items-end justify-between">
