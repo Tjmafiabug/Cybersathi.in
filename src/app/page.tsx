@@ -1,13 +1,11 @@
 import { Hero } from "@/components/landing/hero";
-import { LatestBlogs } from "@/components/landing/latest-blogs";
-import { TrendingNews } from "@/components/landing/trending-news";
+import { BlogsAndNews } from "@/components/landing/blogs-and-news";
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <LatestBlogs />
-      <TrendingNews />
+      <BlogsAndNews />
     </>
   );
 }
