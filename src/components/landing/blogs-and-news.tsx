@@ -121,10 +121,14 @@ export function BlogsAndNews() {
             animate="visible"
           >
             {recentPosts.map((post) => (
-              <motion.div key={post.title} variants={listItemVariants}>
+              <motion.div
+                key={post.title}
+                variants={listItemVariants}
+                className="py-5 first:pt-0 last:pb-0"
+              >
                 <Link
                   href={post.href}
-                  className="group flex gap-5 py-5 transition-colors first:pt-0 last:pb-0"
+                  className="group flex gap-5 transition-colors"
                 >
                   <div className="overflow-hidden rounded-lg">
                     <img
