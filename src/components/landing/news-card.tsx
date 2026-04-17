@@ -21,7 +21,7 @@ export interface NewsCardProps {
   newsItems: NewsItem[];
 }
 
-const containerVariants = {
+export const listContainerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -29,7 +29,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+export const listItemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -59,13 +59,13 @@ export function NewsCard({
 
       <motion.ul
         className="space-y-4"
-        variants={containerVariants}
+        variants={listContainerVariants}
         initial="hidden"
         animate="visible"
         aria-label={`${title} list`}
       >
         {newsItems.map((item) => (
-          <motion.li key={item.id} variants={itemVariants}>
+          <motion.li key={item.id} variants={listItemVariants}>
             <a
               href={item.href}
               target={item.external ? "_blank" : undefined}

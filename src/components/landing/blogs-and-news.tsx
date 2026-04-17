@@ -1,8 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-import { NewsCard, type NewsItem } from "./news-card";
+import {
+  NewsCard,
+  listContainerVariants,
+  listItemVariants,
+  type NewsItem,
+} from "./news-card";
 
 type BlogCard = {
   title: string;
@@ -106,31 +114,37 @@ export function BlogsAndNews() {
             </Link>
           </div>
 
-          <div className="flex flex-col divide-y divide-border/60">
+          <motion.div
+            className="flex flex-col divide-y divide-border/60"
+            variants={listContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {recentPosts.map((post) => (
-              <Link
-                key={post.title}
-                href={post.href}
-                className="group flex gap-5 py-5 transition-colors first:pt-0 last:pb-0"
-              >
-                <div className="overflow-hidden rounded-lg">
-                  <img
-                    src={post.imageUrl}
-                    alt=""
-                    className="h-28 w-40 shrink-0 object-cover transition duration-300 group-hover:scale-105 sm:h-32 sm:w-48"
-                  />
-                </div>
-                <div className="flex min-w-0 flex-col justify-center">
-                  <p className="text-xs font-medium uppercase tracking-wider text-primary">
-                    {post.category}
-                  </p>
-                  <h3 className="mt-2 text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-lg">
-                    {post.title}
-                  </h3>
-                </div>
-              </Link>
+              <motion.div key={post.title} variants={listItemVariants}>
+                <Link
+                  href={post.href}
+                  className="group flex gap-5 py-5 transition-colors first:pt-0 last:pb-0"
+                >
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      src={post.imageUrl}
+                      alt=""
+                      className="h-28 w-40 shrink-0 object-cover transition duration-300 group-hover:scale-105 sm:h-32 sm:w-48"
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-col justify-center">
+                    <p className="text-xs font-medium uppercase tracking-wider text-primary">
+                      {post.category}
+                    </p>
+                    <h3 className="mt-2 text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-lg">
+                      {post.title}
+                    </h3>
+                  </div>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         <div className="lg:col-span-2">
