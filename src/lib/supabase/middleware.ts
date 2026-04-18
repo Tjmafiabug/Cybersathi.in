@@ -27,16 +27,7 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: no logic between createServerClient and getClaims — this is the
   // only call that refreshes an expired session on the response cookies.
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims
-
-  const url = request.nextUrl
-  if (url.pathname.startsWith("/admin") && !user) {
-    const redirectUrl = url.clone()
-    redirectUrl.pathname = "/login"
-    redirectUrl.searchParams.set("next", url.pathname)
-    return NextResponse.redirect(redirectUrl)
-  }
+  await supabase.auth.getClaims()
 
   return supabaseResponse
 }

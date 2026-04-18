@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { login, type LoginState } from "./actions"
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(
     login,
     undefined,
@@ -14,8 +14,6 @@ export function LoginForm({ next }: { next?: string }) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      {next ? <input type="hidden" name="next" value={next} /> : null}
-
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="email"

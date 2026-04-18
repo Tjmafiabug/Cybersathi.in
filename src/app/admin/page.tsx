@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 
 import { db, schema } from "@/lib/db"
-import { requireAdmin } from "@/lib/auth/dal"
+import { getAdminSession } from "@/lib/auth/dal"
 import { cn } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
@@ -31,7 +31,8 @@ async function countByStatus(
 }
 
 export default async function AdminDashboardPage() {
-  const session = await requireAdmin()
+  const session = await getAdminSession()
+  if (!session) return null
 
   const [blogs, news, videos, recentJobs] = await Promise.all([
     countByStatus(schema.blogs),

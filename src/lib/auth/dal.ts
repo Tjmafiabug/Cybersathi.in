@@ -1,7 +1,6 @@
 import "server-only"
 
 import { cache } from "react"
-import { redirect } from "next/navigation"
 import { eq } from "drizzle-orm"
 
 import { db, schema } from "@/lib/db"
@@ -37,9 +36,3 @@ export const getAdminSession = cache(async (): Promise<AdminSession | null> => {
     displayName: profile.displayName,
   }
 })
-
-export async function requireAdmin(): Promise<AdminSession> {
-  const session = await getAdminSession()
-  if (!session) redirect("/login?next=/admin")
-  return session
-}
