@@ -1,3 +1,7 @@
+onlyBuiltDependencies:
+  - "@sentry/cli"
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+  - esbuild
+  - msw
