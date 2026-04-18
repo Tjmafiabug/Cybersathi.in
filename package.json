@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:policies": "tsx --env-file=.env.local scripts/run-sql.ts supabase/policies.sql",
+    "db:seed": "tsx --env-file=.env.local scripts/run-sql.ts supabase/seed.sql"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -67,6 +72,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
+    "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
