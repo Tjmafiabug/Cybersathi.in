@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ShieldHalf } from "lucide-react"
 
 import { getAdminSession } from "@/lib/auth/dal"
+import { Toaster } from "@/components/ui/sonner"
 import { AdminSidebar } from "./admin-sidebar"
 import { LoginForm } from "./login-form"
 
@@ -61,6 +62,7 @@ export default async function AdminLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         <main className="flex-1 p-6 lg:p-8">{children}</main>
       </div>
+      <Toaster />
     </div>
   )
 }
