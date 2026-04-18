@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:policies": "tsx --env-file=.env.local scripts/run-sql.ts supabase/policies.sql",
-    "db:seed": "tsx --env-file=.env.local scripts/run-sql.ts supabase/seed.sql"
+    "db:seed": "tsx --env-file=.env.local scripts/run-sql.ts supabase/seed.sql",
+    "db:seed-content": "tsx --env-file=.env.local scripts/run-sql.ts supabase/seed-content.sql"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -21,6 +22,7 @@
     "@sentry/nextjs": "^10.49.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
+    "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-query": "^5.99.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

@@ -1,0 +1,104 @@
+You are given a task to integrate an existing React component in the codebase
+
+The codebase should support:
+- shadcn project structure  
+- Tailwind CSS
+- Typescript
+
+If it doesn't, provide instructions on how to setup project via shadcn CLI, install Tailwind or Typescript.
+
+Determine the default path for components and styles. 
+If default path for components is not /components/ui, provide instructions on why it's important to create this folder
+Copy-paste this component to /components/ui folder:
+```tsx
+filter-chips-breadcrumb.tsx
+"use client"
+import { X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+interface FilterBreadcrumbProps {
+  className?: string
+  filters?: Array<{ id: string; name: string; value: string }>
+  onRemove?: (id: string) => void
+}
+
+export function Breadcrumb({
+  className,
+  filters = [
+    { id: "category", name: "Category", value: "Electronics" },
+    { id: "price", name: "Price", value: "$100-$200" },
+    { id: "color", name: "Color", value: "Black" },
+  ],
+  onRemove = () => {},
+}: FilterBreadcrumbProps) {
+  return (
+    <div
+      className={cn("p-2 sm:p-3 rounded-xl bg-gray-100 dark:bg-zinc-900 text-gray-900 dark:text-zinc-100", className)}
+    >
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+        <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Filters:</span>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 w-full">
+          {filters.map((filter) => (
+            <span
+              key={filter.id}
+              className="inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium bg-gray-200 dark:bg-zinc-800 text-gray-800 dark:text-zinc-200"
+            >
+              <span className="truncate max-w-[100px] sm:max-w-none">
+                {filter.name}: {filter.value}
+              </span>
+              <button
+                type="button"
+                className="ml-1 inline-flex h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 items-center justify-center rounded-full hover:bg-gray-300 dark:hover:bg-zinc-700 hover:text-gray-900 dark:hover:text-zinc-100 focus:outline-none"
+                onClick={() => onRemove(filter.id)}
+              >
+                <X className="h-2 w-2 sm:h-3 sm:w-3" />
+                <span className="sr-only">Remove {filter.name} filter</span>
+              </button>
+            </span>
+          ))}
+          <button className="text-[10px] sm:text-xs underline text-gray-600 dark:text-zinc-400 whitespace-nowrap">
+            Clear all
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+demo.tsx
+import { Breadcrumb } from "@/components/ui/filter-chips-breadcrumb";
+
+export default function DemoOne() {
+  return <Breadcrumb
+       filters={[
+        { id: "category", name: "Category", value: "Electronics" },
+        { id: "price", name: "Price", value: "$100-$200" },
+        { id: "color", name: "Color", value: "Black" },
+      ]}
+      />;
+}
+
+```
+
+Install NPM dependencies:
+```bash
+lucide-react
+```
+
+Implementation Guidelines
+ 1. Analyze the component structure and identify all required dependencies
+ 2. Review the component's argumens and state
+ 3. Identify any required context providers or hooks and install them
+ 4. Questions to Ask
+ - What data/props will be passed to this component?
+ - Are there any specific state management requirements?
+ - Are there any required assets (images, icons, etc.)?
+ - What is the expected responsive behavior?
+ - What is the best place to use this component in the app?
+
+Steps to integrate
+ 0. Copy paste all the code above in the correct directories
+ 1. Install external dependencies
+ 2. Fill image assets with Unsplash stock images you know exist
+ 3. Use lucide-react icons for svgs or logos if component requires them

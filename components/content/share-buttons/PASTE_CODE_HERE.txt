@@ -1,0 +1,137 @@
+You are given a task to integrate an existing React component in the codebase
+
+The codebase should support:
+- shadcn project structure  
+- Tailwind CSS
+- Typescript
+
+If it doesn't, provide instructions on how to setup project via shadcn CLI, install Tailwind or Typescript.
+
+Determine the default path for components and styles. 
+If default path for components is not /components/ui, provide instructions on why it's important to create this folder
+Copy-paste this component to /components/ui folder:
+```tsx
+social-button.tsx
+'use client'
+
+import { useState, FC, ReactNode, useRef, useEffect, type RefObject } from 'react'
+import { Check, Copy, Instagram, Linkedin, Share2, Twitter } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: any[]) { return twMerge(clsx(inputs)) }
+
+function useClickOutside(ref: RefObject<HTMLElement | null>, handler: () => void) {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) handler()
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [ref, handler])
+}
+
+const shareButtons = [
+  { icon: Twitter, label: 'Twitter', color: 'hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10' },
+  { icon: Instagram, label: 'Instagram', color: 'hover:text-[#E1306C] hover:bg-[#E1306C]/10' },
+  { icon: Linkedin, label: 'LinkedIn', color: 'hover:text-[#0A66C2] hover:bg-[#0A66C2]/10' },
+]
+
+export default function SocialButton({ className }: { className?: string }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <OnClickOutside onClickOutside={() => setIsExpanded(false)}>
+      <div className={cn('flex items-center justify-center', className)}>
+        <motion.div
+          animate={{ width: isExpanded ? 'auto' : '120px', height: '48px' }}
+          className={cn(
+            'relative flex items-center overflow-hidden',
+            'bg-white dark:bg-zinc-900',
+            'border border-zinc-200 dark:border-zinc-800',
+            'shadow-sm hover:shadow-md',
+            'cursor-pointer rounded-full'
+          )}
+          initial={false}
+          onClick={() => !isExpanded && setIsExpanded(true)}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        >
+          <AnimatePresence mode='sync'>
+            {!isExpanded ? (
+              <motion.div className='absolute inset-0 flex items-center justify-center gap-2' exit={{ opacity: 0, y: -20 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} key='share-text' transition={{ duration: 0.2 }}>
+                <Share2 className='h-4 w-4' />
+                <span className='text-sm font-medium'>Share</span>
+              </motion.div>
+            ) : (
+              <motion.div className='flex items-center px-1' exit={{ opacity: 0, scale: 0.9 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} key='actions' transition={{ delay: 0.1, duration: 0.2 }}>
+                {shareButtons.map((btn) => (
+                  <button className={cn('flex h-10 w-10 items-center justify-center rounded-full transition-colors', 'text-zinc-600 dark:text-zinc-400', btn.color)} key={btn.label} type='button' title={btn.label}>
+                    <btn.icon className='h-5 w-5' />
+                  </button>
+                ))}
+                <div className='mx-1 h-6 w-px bg-zinc-200 dark:bg-zinc-800' />
+                <button
+                  className={cn('flex h-10 w-10 items-center justify-center rounded-full transition-colors', 'text-zinc-600 dark:text-zinc-400', 'hover:bg-zinc-100 dark:hover:bg-zinc-800', copied && 'bg-green-50 text-green-500 dark:bg-green-900/20 dark:text-green-500')}
+                  onClick={(e) => { e.stopPropagation(); handleCopy() }}
+                  type='button' title='Copy Link'
+                >
+                  {copied ? <Check className='h-5 w-5' /> : <Copy className='h-5 w-5' />}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </OnClickOutside>
+  )
+}
+
+interface OnClickOutsideProps { children: ReactNode; onClickOutside: () => void; classes?: string }
+const OnClickOutside: FC<OnClickOutsideProps> = ({ children, onClickOutside, classes }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useClickOutside(wrapperRef, onClickOutside)
+  return <div ref={wrapperRef} className={cn(classes)}>{children}</div>
+}
+
+
+demo.tsx
+import SocialButton from "../components/ui/social-button";
+
+export default function Demo() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <SocialButton />
+    </div>
+  );
+}
+
+```
+
+Install NPM dependencies:
+```bash
+clsx, lucide-react, framer-motion, tailwind-merge
+```
+
+Implementation Guidelines
+ 1. Analyze the component structure and identify all required dependencies
+ 2. Review the component's argumens and state
+ 3. Identify any required context providers or hooks and install them
+ 4. Questions to Ask
+ - What data/props will be passed to this component?
+ - Are there any specific state management requirements?
+ - Are there any required assets (images, icons, etc.)?
+ - What is the expected responsive behavior?
+ - What is the best place to use this component in the app?
+
+Steps to integrate
+ 0. Copy paste all the code above in the correct directories
+ 1. Install external dependencies
+ 2. Fill image assets with Unsplash stock images you know exist
+ 3. Use lucide-react icons for svgs or logos if component requires them

@@ -1,0 +1,384 @@
+import "server-only"
+
+import { and, desc, eq, ne, notInArray, sql } from "drizzle-orm"
+
+import { db, schema } from "@/lib/db"
+
+const PER_PAGE = 12
+
+export async function listPublishedBlogs({
+  page = 1,
+  categorySlug,
+}: {
+  page?: number
+  categorySlug?: string
+} = {}) {
+  const offset = (page - 1) * PER_PAGE
+  const where = categorySlug
+    ? and(
+        eq(schema.blogs.status, "published"),
+        eq(schema.categories.slug, categorySlug),
+      )
+    : eq(schema.blogs.status, "published")
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({
+        id: schema.blogs.id,
+        slug: schema.blogs.slug,
+        title: schema.blogs.title,
+        metaDescription: schema.blogs.metaDescription,
+        coverImageUrl: schema.blogs.coverImageUrl,
+        author: schema.blogs.author,
+        publishedAt: schema.blogs.publishedAt,
+        categorySlug: schema.categories.slug,
+        categoryName: schema.categories.name,
+      })
+      .from(schema.blogs)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.blogs.categoryId),
+      )
+      .where(where)
+      .orderBy(desc(schema.blogs.publishedAt))
+      .limit(PER_PAGE)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.blogs)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.blogs.categoryId),
+      )
+      .where(where),
+  ])
+
+  return {
+    rows,
+    total: totalRow[0]?.count ?? 0,
+    page,
+    perPage: PER_PAGE,
+    totalPages: Math.max(1, Math.ceil((totalRow[0]?.count ?? 0) / PER_PAGE)),
+  }
+}
+
+export async function getBlogBySlug(slug: string) {
+  const [row] = await db
+    .select({
+      id: schema.blogs.id,
+      slug: schema.blogs.slug,
+      title: schema.blogs.title,
+      metaDescription: schema.blogs.metaDescription,
+      bodyMd: schema.blogs.bodyMd,
+      coverImageUrl: schema.blogs.coverImageUrl,
+      author: schema.blogs.author,
+      publishedAt: schema.blogs.publishedAt,
+      aiGenerated: schema.blogs.aiGenerated,
+      categoryId: schema.blogs.categoryId,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.blogs)
+    .leftJoin(
+      schema.categories,
+      eq(schema.categories.id, schema.blogs.categoryId),
+    )
+    .where(
+      and(eq(schema.blogs.slug, slug), eq(schema.blogs.status, "published")),
+    )
+    .limit(1)
+
+  return row ?? null
+}
+
+export async function getRelatedBlogs(params: {
+  excludeId: string
+  categoryId: string | null
+  limit?: number
+}) {
+  const { excludeId, categoryId, limit = 3 } = params
+  const rows = await db
+    .select({
+      id: schema.blogs.id,
+      slug: schema.blogs.slug,
+      title: schema.blogs.title,
+      coverImageUrl: schema.blogs.coverImageUrl,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+      publishedAt: schema.blogs.publishedAt,
+    })
+    .from(schema.blogs)
+    .leftJoin(
+      schema.categories,
+      eq(schema.categories.id, schema.blogs.categoryId),
+    )
+    .where(
+      and(
+        eq(schema.blogs.status, "published"),
+        ne(schema.blogs.id, excludeId),
+        categoryId ? eq(schema.blogs.categoryId, categoryId) : undefined,
+      ),
+    )
+    .orderBy(desc(schema.blogs.publishedAt))
+    .limit(limit)
+
+  if (rows.length >= limit) return rows
+
+  // Pad with newest posts from any category.
+  const fillIds = [excludeId, ...rows.map((r) => r.id)]
+  const extra = await db
+    .select({
+      id: schema.blogs.id,
+      slug: schema.blogs.slug,
+      title: schema.blogs.title,
+      coverImageUrl: schema.blogs.coverImageUrl,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+      publishedAt: schema.blogs.publishedAt,
+    })
+    .from(schema.blogs)
+    .leftJoin(
+      schema.categories,
+      eq(schema.categories.id, schema.blogs.categoryId),
+    )
+    .where(
+      and(
+        eq(schema.blogs.status, "published"),
+        notInArray(schema.blogs.id, fillIds),
+      ),
+    )
+    .orderBy(desc(schema.blogs.publishedAt))
+    .limit(limit - rows.length)
+
+  return [...rows, ...extra]
+}
+
+export async function listPublishedNews({
+  page = 1,
+  categorySlug,
+}: {
+  page?: number
+  categorySlug?: string
+} = {}) {
+  const offset = (page - 1) * PER_PAGE
+  const where = categorySlug
+    ? and(
+        eq(schema.newsArticles.status, "published"),
+        eq(schema.categories.slug, categorySlug),
+      )
+    : eq(schema.newsArticles.status, "published")
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({
+        id: schema.newsArticles.id,
+        slug: schema.newsArticles.slug,
+        title: schema.newsArticles.title,
+        summary: schema.newsArticles.summary,
+        imageUrl: schema.newsArticles.imageUrl,
+        sourceUrl: schema.newsArticles.sourceUrl,
+        sourceName: schema.newsSources.name,
+        sourcePublishedAt: schema.newsArticles.sourcePublishedAt,
+        createdAt: schema.newsArticles.createdAt,
+        categorySlug: schema.categories.slug,
+        categoryName: schema.categories.name,
+      })
+      .from(schema.newsArticles)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.newsArticles.categoryId),
+      )
+      .leftJoin(
+        schema.newsSources,
+        eq(schema.newsSources.id, schema.newsArticles.sourceId),
+      )
+      .where(where)
+      .orderBy(
+        desc(
+          sql`coalesce(${schema.newsArticles.sourcePublishedAt}, ${schema.newsArticles.createdAt})`,
+        ),
+      )
+      .limit(PER_PAGE)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.newsArticles)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.newsArticles.categoryId),
+      )
+      .where(where),
+  ])
+
+  return {
+    rows,
+    total: totalRow[0]?.count ?? 0,
+    page,
+    perPage: PER_PAGE,
+    totalPages: Math.max(1, Math.ceil((totalRow[0]?.count ?? 0) / PER_PAGE)),
+  }
+}
+
+export async function getNewsBySlug(slug: string) {
+  const [row] = await db
+    .select({
+      id: schema.newsArticles.id,
+      slug: schema.newsArticles.slug,
+      title: schema.newsArticles.title,
+      summary: schema.newsArticles.summary,
+      imageUrl: schema.newsArticles.imageUrl,
+      sourceUrl: schema.newsArticles.sourceUrl,
+      sourceName: schema.newsSources.name,
+      sourcePublishedAt: schema.newsArticles.sourcePublishedAt,
+      createdAt: schema.newsArticles.createdAt,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.newsArticles)
+    .leftJoin(
+      schema.categories,
+      eq(schema.categories.id, schema.newsArticles.categoryId),
+    )
+    .leftJoin(
+      schema.newsSources,
+      eq(schema.newsSources.id, schema.newsArticles.sourceId),
+    )
+    .where(
+      and(
+        eq(schema.newsArticles.slug, slug),
+        eq(schema.newsArticles.status, "published"),
+      ),
+    )
+    .limit(1)
+
+  return row ?? null
+}
+
+export async function listPublishedVideos({
+  page = 1,
+  categorySlug,
+}: {
+  page?: number
+  categorySlug?: string
+} = {}) {
+  const offset = (page - 1) * PER_PAGE
+  const where = categorySlug
+    ? and(
+        eq(schema.videos.status, "published"),
+        eq(schema.categories.slug, categorySlug),
+      )
+    : eq(schema.videos.status, "published")
+
+  const [rows, totalRow] = await Promise.all([
+    db
+      .select({
+        id: schema.videos.id,
+        slug: schema.videos.slug,
+        youtubeId: schema.videos.youtubeId,
+        title: schema.videos.title,
+        summary: schema.videos.summary,
+        channelName: schema.videos.channelName,
+        thumbnailUrl: schema.videos.thumbnailUrl,
+        durationSeconds: schema.videos.durationSeconds,
+        publishedAt: schema.videos.publishedAt,
+        categorySlug: schema.categories.slug,
+        categoryName: schema.categories.name,
+      })
+      .from(schema.videos)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.videos.categoryId),
+      )
+      .where(where)
+      .orderBy(
+        desc(
+          sql`coalesce(${schema.videos.publishedAt}, ${schema.videos.createdAt})`,
+        ),
+      )
+      .limit(PER_PAGE)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.videos)
+      .leftJoin(
+        schema.categories,
+        eq(schema.categories.id, schema.videos.categoryId),
+      )
+      .where(where),
+  ])
+
+  return {
+    rows,
+    total: totalRow[0]?.count ?? 0,
+    page,
+    perPage: PER_PAGE,
+    totalPages: Math.max(1, Math.ceil((totalRow[0]?.count ?? 0) / PER_PAGE)),
+  }
+}
+
+export async function getVideoBySlug(slug: string) {
+  const [row] = await db
+    .select({
+      id: schema.videos.id,
+      slug: schema.videos.slug,
+      youtubeId: schema.videos.youtubeId,
+      title: schema.videos.title,
+      description: schema.videos.description,
+      summary: schema.videos.summary,
+      transcript: schema.videos.transcript,
+      timestamps: schema.videos.timestamps,
+      channelName: schema.videos.channelName,
+      thumbnailUrl: schema.videos.thumbnailUrl,
+      durationSeconds: schema.videos.durationSeconds,
+      publishedAt: schema.videos.publishedAt,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.videos)
+    .leftJoin(
+      schema.categories,
+      eq(schema.categories.id, schema.videos.categoryId),
+    )
+    .where(
+      and(
+        eq(schema.videos.slug, slug),
+        eq(schema.videos.status, "published"),
+      ),
+    )
+    .limit(1)
+
+  return row ?? null
+}
+
+export async function getCategoryBySlug(slug: string) {
+  const [row] = await db
+    .select()
+    .from(schema.categories)
+    .where(eq(schema.categories.slug, slug))
+    .limit(1)
+  return row ?? null
+}
+
+export async function listCategoriesWithCounts() {
+  const rows = await db
+    .select({
+      id: schema.categories.id,
+      slug: schema.categories.slug,
+      name: schema.categories.name,
+      description: schema.categories.description,
+      icon: schema.categories.icon,
+      sortOrder: schema.categories.sortOrder,
+      count: sql<number>`
+        (select count(*) from public.blogs b
+         where b.category_id = ${schema.categories.id} and b.status = 'published')
+        + (select count(*) from public.news_articles n
+           where n.category_id = ${schema.categories.id} and n.status = 'published')
+        + (select count(*) from public.videos v
+           where v.category_id = ${schema.categories.id} and v.status = 'published')
+      `.mapWith(Number),
+    })
+    .from(schema.categories)
+    .orderBy(schema.categories.sortOrder)
+  return rows
+}
+

@@ -1,0 +1,183 @@
+You are given a task to integrate an existing React component in the codebase
+
+The codebase should support:
+- shadcn project structure  
+- Tailwind CSS
+- Typescript
+
+If it doesn't, provide instructions on how to setup project via shadcn CLI, install Tailwind or Typescript.
+
+Determine the default path for components and styles. 
+If default path for components is not /components/ui, provide instructions on why it's important to create this folder
+Copy-paste this component to /components/ui folder:
+```tsx
+card-8.tsx
+'use client'; // Required for framer-motion animations
+
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { Share2 } from 'lucide-react';
+import { cn } from '@/lib/utils'; // Assuming 'cn' utility from shadcn
+
+// Props interface remains the same
+interface ArticleCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  imageUrl: string;
+  imageAlt: string;
+  title: string;
+  description: string;
+  authorName: string;
+  authorImageUrl: string;
+  date: string;
+  onShareClick?: () => void;
+}
+
+/**
+ * An animated, responsive card component for displaying articles.
+ * Uses framer-motion for hover and entry animations.
+ */
+const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(
+  (
+    {
+      className,
+      imageUrl,
+      imageAlt,
+      title,
+      description,
+      authorName,
+      authorImageUrl,
+      date,
+      onShareClick,
+      ...props
+    },
+    ref
+  ) => {
+    // Animation variants for the card container
+    const cardVariants = {
+      initial: { opacity: 0, y: 20 },
+      whileInView: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: 'easeInOut' },
+      },
+      whileHover: {
+        scale: 1.03,
+        boxShadow: '0px 10px 20px rgba(0,0,0,0.1)', // Example shadow
+        transition: { duration: 0.3 },
+      },
+    };
+
+    return (
+      <motion.div
+        ref={ref}
+        variants={cardVariants}
+        initial="initial"
+        whileInView="whileInView"
+        whileHover="whileHover"
+        viewport={{ once: true, amount: 0.2 }} // Animate once when 20% is visible
+        className={cn(
+          'group flex max-w-2xl flex-col overflow-hidden rounded-xl bg-card shadow-sm md:flex-row',
+          className
+        )}
+        {...props}
+      >
+        {/* Image Section */}
+        <div className="md:w-2/5">
+          <img
+            src={imageUrl}
+            alt={imageAlt}
+            className="h-full w-full object-cover"
+          />
+        </div>
+
+        {/* Content Section */}
+        <div className="flex flex-1 flex-col justify-between p-6 md:w-3/5">
+          <div className="flex-1">
+            {/* Title */}
+            <h2 className="mb-2 text-xl font-semibold leading-tight text-card-foreground">
+              {title}
+            </h2>
+            {/* Description */}
+            <p className="mb-4 text-sm text-muted-foreground">
+              {description}
+            </p>
+          </div>
+
+          {/* Footer Section with Author and Share Icon */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img
+                src={authorImageUrl}
+                alt={authorName}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {authorName}
+                </p>
+                <p className="text-xs text-muted-foreground">{date}</p>
+              </div>
+            </div>
+
+            {/* Share Button */}
+            <button
+              onClick={onShareClick}
+              aria-label="Share article"
+              className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+);
+ArticleCard.displayName = 'ArticleCard';
+
+export { ArticleCard };
+
+demo.tsx
+import { ArticleCard } from '@/components/ui/card-8'; // Adjust the import path
+
+const ArticleCardDemo = () => {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-background p-4">
+      <ArticleCard
+        imageUrl="https://images.unsplash.com/photo-1460472178825-e5240623afd5?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop"
+        imageAlt="Close-up of code on a screen"
+        title="Green plants are going to Extinct about 500 times faster than they should, Study finds"
+        description="If you are the sort of person who just can not keep a plant alive, you are not alone according to a new study published June 10 in the journal Nature..."
+        authorName="Alexander Parkinson"
+        authorImageUrl="https://randomuser.me/api/portraits/men/32.jpg"
+        date="Jun 20, 2019"
+        onShareClick={() => alert('Share functionality triggered!')}
+        className="w-full"
+      />
+    </div>
+  );
+};
+
+export default ArticleCardDemo;
+```
+
+Install NPM dependencies:
+```bash
+lucide-react, framer-motion
+```
+
+Implementation Guidelines
+ 1. Analyze the component structure and identify all required dependencies
+ 2. Review the component's argumens and state
+ 3. Identify any required context providers or hooks and install them
+ 4. Questions to Ask
+ - What data/props will be passed to this component?
+ - Are there any specific state management requirements?
+ - Are there any required assets (images, icons, etc.)?
+ - What is the expected responsive behavior?
+ - What is the best place to use this component in the app?
+
+Steps to integrate
+ 0. Copy paste all the code above in the correct directories
+ 1. Install external dependencies
+ 2. Fill image assets with Unsplash stock images you know exist
+ 3. Use lucide-react icons for svgs or logos if component requires them
