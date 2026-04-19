@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { desc, eq, sql } from "drizzle-orm"
 import { formatDistanceToNow } from "date-fns"
 
@@ -105,7 +106,12 @@ export default async function AdminNewsPage({
               {rows.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="max-w-[420px] truncate">
-                    <span className="font-medium">{r.title}</span>
+                    <Link
+                      href={`/admin/news/${r.id}`}
+                      className="font-medium hover:underline underline-offset-4"
+                    >
+                      {r.title}
+                    </Link>
                     <span className="ml-2 text-xs text-muted-foreground">
                       /{r.slug}
                     </span>
