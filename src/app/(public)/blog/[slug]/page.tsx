@@ -13,7 +13,8 @@ import {
   TableOfContents,
   extractTocHeadings,
 } from "@/components/content/toc"
-import { getBlogBySlug, getRelatedBlogs } from "@/lib/content/queries"
+import { JsonLd } from "@/components/seo/json-ld"
+import { getBlogBySlug, getRelatedBlogs, listAllPublishedSlugs } from "@/lib/content/queries"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -41,6 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  const { blogs } = await listAllPublishedSlugs()
+  return blogs.map((b) => ({ slug: b.slug }))
+}
+
 export const revalidate = 600
 
 export default async function BlogDetailPage({ params }: Props) {
@@ -61,8 +67,25 @@ export default async function BlogDetailPage({ params }: Props) {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
   const shareUrl = `${siteUrl}/blog/${blog.slug}`
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: blog.title,
+    description: blog.metaDescription ?? undefined,
+    image: blog.coverImageUrl ?? undefined,
+    author: { "@type": "Person", name: blog.author },
+    publisher: {
+      "@type": "Organization",
+      name: "CyberSathi",
+      url: siteUrl,
+    },
+    datePublished: blog.publishedAt?.toISOString(),
+    url: shareUrl,
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <JsonLd data={jsonLd} />
       <ContentBreadcrumb
         crumbs={[
           { label: "Home", href: "/" },

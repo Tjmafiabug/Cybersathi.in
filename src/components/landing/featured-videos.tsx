@@ -11,43 +11,14 @@ type VideoCard = {
   title: string;
   channel: string;
   duration: string;
-  views: string;
   href: string;
   thumbnailUrl: string;
   description?: string;
 };
 
-const featuredVideos: VideoCard[] = [
-  {
-    title: "How the \u20b9500 UPI scam actually works — a live demo",
-    channel: "CyberAware India",
-    duration: "12:34",
-    views: "450K views",
-    href: "#",
-    thumbnailUrl:
-      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&h=750&auto=format&fit=crop&q=60",
-    description:
-      "Watch a white-hat walk through the exact pull-payment request scammers send, and the five seconds you have to react before the money is gone.",
-  },
-  {
-    title: "Inside a ransomware negotiation: leaked chat transcripts",
-    channel: "Dark Reading",
-    duration: "8:22",
-    views: "127K views",
-    href: "#",
-    thumbnailUrl:
-      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=500&auto=format&fit=crop&q=60",
-  },
-  {
-    title: "Why your phone's SIM card is the weakest link in 2FA",
-    channel: "Scam School",
-    duration: "15:07",
-    views: "89K views",
-    href: "#",
-    thumbnailUrl:
-      "https://images.unsplash.com/photo-1579621970795-87facc2f976d?w=800&h=500&auto=format&fit=crop&q=60",
-  },
-];
+interface FeaturedVideosProps {
+  videos: VideoCard[];
+}
 
 function VideoThumbnail({
   src,
@@ -76,8 +47,10 @@ function VideoThumbnail({
   );
 }
 
-export function FeaturedVideos() {
-  const [featured, ...rest] = featuredVideos;
+export function FeaturedVideos({ videos }: FeaturedVideosProps) {
+  const [featured, ...rest] = videos;
+
+  if (!featured) return null;
 
   return (
     <section className="bg-muted/30 pt-10 pb-20 md:pt-12 md:pb-28">
@@ -117,14 +90,14 @@ export function FeaturedVideos() {
                   </p>
                 )}
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {featured.channel} &bull; {featured.views}
+                  {featured.channel}
                 </p>
               </div>
             </Link>
           </motion.div>
 
           {rest.map((video) => (
-            <motion.div key={video.title} variants={listItemVariants}>
+            <motion.div key={video.href} variants={listItemVariants}>
               <Link href={video.href} className="group block">
                 <VideoThumbnail
                   src={video.thumbnailUrl}
@@ -135,7 +108,7 @@ export function FeaturedVideos() {
                     {video.title}
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {video.channel} &bull; {video.views}
+                    {video.channel}
                   </p>
                 </div>
               </Link>
