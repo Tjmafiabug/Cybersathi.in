@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.indiatvnews.com" },
       { protocol: "https", hostname: "**.thehindu.com" },
       { protocol: "https", hostname: "**.livemint.com" },
+      // catch-all for scraped news images from arbitrary sources
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
     ],
   },
 };
