@@ -1,7 +1,7 @@
 {
   "crons": [
-    { "path": "/api/cron/scrape-news", "schedule": "0 */3 * * *" },
-    { "path": "/api/cron/generate-blogs", "schedule": "0 2,14 * * *" },
-    { "path": "/api/cron/fetch-videos", "schedule": "30 */6 * * *" }
+    { "path": "/api/cron/scrape-news", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/generate-blogs", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/fetch-videos", "schedule": "0 4 * * *" }
   ]
 }
