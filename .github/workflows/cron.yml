@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Trigger
         run: |
-          response=$(curl -s -w "\n%{http_code}" -X GET \
+          response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             https://cybersathi.in/api/cron/scrape-news)
           body=$(echo "$response" | head -n -1)
@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Trigger
         run: |
-          response=$(curl -s -w "\n%{http_code}" -X GET \
+          response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             https://cybersathi.in/api/cron/generate-blogs)
           body=$(echo "$response" | head -n -1)
@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Trigger
         run: |
-          response=$(curl -s -w "\n%{http_code}" -X GET \
+          response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             https://cybersathi.in/api/cron/fetch-videos)
           body=$(echo "$response" | head -n -1)
