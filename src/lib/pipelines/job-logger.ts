@@ -20,7 +20,7 @@ export async function finishJob(
   await db
     .update(schema.jobRuns)
     .set({
-      status: errors.length > 0 ? "failed" : "succeeded",
+      status: itemsProcessed === 0 && errors.length > 0 ? "failed" : "succeeded",
       finishedAt: new Date(),
       itemsProcessed,
       errorsJson: errors.length > 0 ? errors : null,
