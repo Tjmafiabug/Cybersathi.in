@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { db, schema } from "@/lib/db"
 import { eq } from "drizzle-orm"
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [blogs, news, videos, categories] = await Promise.all([

@@ -22,13 +22,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const blog = await getBlogBySlug(slug)
   if (!blog) return { title: "Not found" }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+  const canonicalUrl = `${siteUrl}/blog/${blog.slug}`
   return {
     title: `${blog.title} — CyberSathi`,
     description: blog.metaDescription ?? undefined,
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: blog.title,
       description: blog.metaDescription ?? undefined,
       type: "article",
+      url: canonicalUrl,
+      siteName: "CyberSathi",
       publishedTime: blog.publishedAt?.toISOString(),
       authors: [blog.author],
       images: blog.coverImageUrl ? [blog.coverImageUrl] : undefined,
@@ -64,7 +69,7 @@ export default async function BlogDetailPage({ params }: Props) {
   ])
 
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
   const shareUrl = `${siteUrl}/blog/${blog.slug}`
 
   const jsonLd = {

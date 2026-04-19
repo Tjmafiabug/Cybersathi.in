@@ -8,10 +8,27 @@ import {
   listPublishedBlogs,
 } from "@/lib/content/queries"
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+
 export const metadata: Metadata = {
   title: "Blog — CyberSathi",
   description:
     "Long-form guides on cyber-crime, scams, and how to defend against them. Updated often.",
+  alternates: { canonical: `${SITE_URL}/blog` },
+  openGraph: {
+    title: "Blog — CyberSathi",
+    description:
+      "Long-form guides on cyber-crime, scams, and how to defend against them. Updated often.",
+    url: `${SITE_URL}/blog`,
+    type: "website",
+    siteName: "CyberSathi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog — CyberSathi",
+    description:
+      "Long-form guides on cyber-crime, scams, and how to defend against them. Updated often.",
+  },
 }
 
 export const revalidate = 600

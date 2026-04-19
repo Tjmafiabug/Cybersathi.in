@@ -15,13 +15,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const video = await getVideoBySlug(slug)
   if (!video) return { title: "Not found" }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+  const canonicalUrl = `${siteUrl}/video/${video.slug}`
   return {
     title: `${video.title} — CyberSathi`,
     description: video.summary ?? video.description ?? undefined,
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: video.title,
       description: video.summary ?? undefined,
       type: "video.other",
+      url: canonicalUrl,
+      siteName: "CyberSathi",
+      images: video.thumbnailUrl ? [video.thumbnailUrl] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: video.title,
+      description: video.summary ?? undefined,
       images: video.thumbnailUrl ? [video.thumbnailUrl] : undefined,
     },
   }
@@ -48,7 +59,7 @@ export default async function VideoDetailPage({ params }: Props) {
   if (!video) notFound()
 
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
   const shareUrl = `${siteUrl}/video/${video.slug}`
 
   const jsonLd = {

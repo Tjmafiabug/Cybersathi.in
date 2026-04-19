@@ -8,10 +8,27 @@ import {
   listPublishedNews,
 } from "@/lib/content/queries"
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+
 export const metadata: Metadata = {
   title: "News — CyberSathi",
   description:
     "The latest cyber-crime headlines from India and the world, rewritten into short summaries with links back to the original source.",
+  alternates: { canonical: `${SITE_URL}/news` },
+  openGraph: {
+    title: "News — CyberSathi",
+    description:
+      "The latest cyber-crime headlines from India and the world, rewritten into short summaries with links back to the original source.",
+    url: `${SITE_URL}/news`,
+    type: "website",
+    siteName: "CyberSathi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "News — CyberSathi",
+    description:
+      "The latest cyber-crime headlines from India and the world, rewritten into short summaries with links back to the original source.",
+  },
 }
 
 export const revalidate = 300

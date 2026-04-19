@@ -8,10 +8,27 @@ import {
   listPublishedVideos,
 } from "@/lib/content/queries"
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+
 export const metadata: Metadata = {
   title: "Videos — CyberSathi",
   description:
     "Curated YouTube videos on cyber-crime, with AI-generated summaries and timestamps so you can skip to the part that matters.",
+  alternates: { canonical: `${SITE_URL}/videos` },
+  openGraph: {
+    title: "Videos — CyberSathi",
+    description:
+      "Curated YouTube videos on cyber-crime, with AI-generated summaries and timestamps so you can skip to the part that matters.",
+    url: `${SITE_URL}/videos`,
+    type: "website",
+    siteName: "CyberSathi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Videos — CyberSathi",
+    description:
+      "Curated YouTube videos on cyber-crime, with AI-generated summaries and timestamps so you can skip to the part that matters.",
+  },
 }
 
 export const revalidate = 600

@@ -1,0 +1,43 @@
+# CyberSathi
+
+> Cyber crime awareness and alerts for India. Blogs, world news, and curated videos on phishing, UPI fraud, ransomware, identity theft, and online scams — so you can stay one step ahead of scammers.
+
+## Site
+
+- Homepage: https://www.cybersathi.in
+- Blog: https://www.cybersathi.in/blog
+- News: https://www.cybersathi.in/news
+- Videos: https://www.cybersathi.in/videos
+- About: https://www.cybersathi.in/about
+
+## Content
+
+CyberSathi publishes:
+- Long-form guides on cyber-crime patterns in India (phishing, UPI fraud, ransomware, SIM swap, identity theft, crypto scams)
+- Short summaries of cyber-crime news from India and globally, with links to original sources
+- Curated YouTube videos on cybersecurity topics with AI-generated summaries
+
+## Categories
+
+- Phishing: https://www.cybersathi.in/category/phishing
+- Ransomware: https://www.cybersathi.in/category/ransomware
+- UPI Fraud: https://www.cybersathi.in/category/upi-fraud
+- Identity Theft: https://www.cybersathi.in/category/identity-theft
+- Data Breaches: https://www.cybersathi.in/category/data-breaches
+- Dark Web: https://www.cybersathi.in/category/dark-web
+- Social Engineering: https://www.cybersathi.in/category/social-engineering
+- Malware: https://www.cybersathi.in/category/malware
+- Cryptocurrency Fraud: https://www.cybersathi.in/category/cryptocurrency
+- Investment Fraud: https://www.cybersathi.in/category/investment-fraud
+- Children Safety: https://www.cybersathi.in/category/children-safety
+- Cyber Law: https://www.cybersathi.in/category/cyber-law
+
+## Audience
+
+Indian internet users, SMBs, parents, and professionals seeking plain-language cybersecurity awareness content. Primary language: English. India-focused coverage.
+
+## Contact
+
+- Contact: https://www.cybersathi.in/contact
+- Privacy Policy: https://www.cybersathi.in/privacy
+- Terms: https://www.cybersathi.in/terms

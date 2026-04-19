@@ -18,13 +18,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const news = await getNewsBySlug(slug)
   if (!news) return { title: "Not found" }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
+  const canonicalUrl = `${siteUrl}/news/${news.slug}`
   return {
     title: `${news.title} — CyberSathi`,
     description: news.summary,
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: news.title,
       description: news.summary,
       type: "article",
+      url: canonicalUrl,
+      siteName: "CyberSathi",
+      images: news.imageUrl ? [news.imageUrl] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: news.title,
+      description: news.summary ?? undefined,
       images: news.imageUrl ? [news.imageUrl] : undefined,
     },
   }
@@ -45,7 +56,7 @@ export default async function NewsDetailPage({ params }: Props) {
   const when = news.sourcePublishedAt ?? news.createdAt
   const sourceHost = news.sourceName ?? new URL(news.sourceUrl).hostname
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cybersathi.in"
   const shareUrl = `${siteUrl}/news/${news.slug}`
 
   const jsonLd = {
