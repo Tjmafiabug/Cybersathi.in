@@ -11,6 +11,8 @@ import {
   listPublishedVideos,
 } from "@/lib/content/queries";
 
+export const revalidate = 600;
+
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
