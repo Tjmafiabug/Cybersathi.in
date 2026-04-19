@@ -30,7 +30,7 @@ jobs:
         run: |
           response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://cybersathi.in/api/cron/scrape-news)
+            https://www.cybersathi.in/api/cron/scrape-news)
           body=$(echo "$response" | head -n -1)
           code=$(echo "$response" | tail -n 1)
           echo "Status: $code"
@@ -48,7 +48,7 @@ jobs:
         run: |
           response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://cybersathi.in/api/cron/generate-blogs)
+            https://www.cybersathi.in/api/cron/generate-blogs)
           body=$(echo "$response" | head -n -1)
           code=$(echo "$response" | tail -n 1)
           echo "Status: $code"
@@ -66,7 +66,7 @@ jobs:
         run: |
           response=$(curl -sL -w "\n%{http_code}" -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://cybersathi.in/api/cron/fetch-videos)
+            https://www.cybersathi.in/api/cron/fetch-videos)
           body=$(echo "$response" | head -n -1)
           code=$(echo "$response" | tail -n 1)
           echo "Status: $code"
