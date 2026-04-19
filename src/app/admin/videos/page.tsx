@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SitePagination } from "@/components/content/site-pagination"
 import { db, schema } from "@/lib/db"
 import { getAdminSession } from "@/lib/auth/dal"
 
@@ -23,8 +24,9 @@ import {
 import { VideoRowActions } from "./row-actions"
 
 export const dynamic = "force-dynamic"
-
 export const metadata = { title: "Videos — Admin · CyberSathi" }
+
+const PAGE_SIZE = 25
 
 function formatDuration(seconds: number | null): string {
   if (!seconds) return "—"
@@ -38,20 +40,20 @@ function formatDuration(seconds: number | null): string {
 export default async function AdminVideosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; page?: string }>
 }) {
   const session = await getAdminSession()
   if (!session) return null
 
-  const { status: rawStatus } = await searchParams
+  const { status: rawStatus, page: pageRaw } = await searchParams
   const current = parseStatusParam(rawStatus)
+  const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1)
 
-  const [counts, rows] = await Promise.all([
+  const statusFilter = current === "all" ? undefined : eq(schema.videos.status, current)
+
+  const [counts, rows, [{ total }]] = await Promise.all([
     db
-      .select({
-        status: schema.videos.status,
-        count: sql<number>`count(*)::int`,
-      })
+      .select({ status: schema.videos.status, count: sql<number>`count(*)::int` })
       .from(schema.videos)
       .groupBy(schema.videos.status),
     db
@@ -66,9 +68,14 @@ export default async function AdminVideosPage({
         createdAt: schema.videos.createdAt,
       })
       .from(schema.videos)
-      .where(current === "all" ? undefined : eq(schema.videos.status, current))
+      .where(statusFilter)
       .orderBy(desc(schema.videos.createdAt))
-      .limit(50),
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(schema.videos)
+      .where(statusFilter),
   ])
 
   const countMap: Partial<Record<StatusFilterValue, number>> = {
@@ -76,11 +83,13 @@ export default async function AdminVideosPage({
   }
   for (const r of counts) countMap[r.status] = r.count
 
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
         title="Videos"
-        description="Curated YouTube videos with AI summaries. Latest 50 shown."
+        description="Curated YouTube videos with AI summaries."
       />
 
       <StatusFilter basePath="/admin/videos" current={current} counts={countMap} />
@@ -140,6 +149,13 @@ export default async function AdminVideosPage({
           </Table>
         </div>
       )}
+
+      <SitePagination
+        basePath="/admin/videos"
+        page={page}
+        totalPages={totalPages}
+        extraParams={{ status: current === "all" ? undefined : current }}
+      />
     </div>
   )
 }

@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SitePagination } from "@/components/content/site-pagination"
 import { db, schema } from "@/lib/db"
 import { getAdminSession } from "@/lib/auth/dal"
 
@@ -24,26 +25,28 @@ import {
 import { NewsRowActions } from "./row-actions"
 
 export const dynamic = "force-dynamic"
-
 export const metadata = { title: "News — Admin · CyberSathi" }
+
+const PAGE_SIZE = 25
 
 export default async function AdminNewsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; page?: string }>
 }) {
   const session = await getAdminSession()
   if (!session) return null
 
-  const { status: rawStatus } = await searchParams
+  const { status: rawStatus, page: pageRaw } = await searchParams
   const current = parseStatusParam(rawStatus)
+  const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1)
 
-  const [counts, rows] = await Promise.all([
+  const statusFilter =
+    current === "all" ? undefined : eq(schema.newsArticles.status, current)
+
+  const [counts, rows, [{ total }]] = await Promise.all([
     db
-      .select({
-        status: schema.newsArticles.status,
-        count: sql<number>`count(*)::int`,
-      })
+      .select({ status: schema.newsArticles.status, count: sql<number>`count(*)::int` })
       .from(schema.newsArticles)
       .groupBy(schema.newsArticles.status),
     db
@@ -58,17 +61,15 @@ export default async function AdminNewsPage({
         sourcePublishedAt: schema.newsArticles.sourcePublishedAt,
       })
       .from(schema.newsArticles)
-      .leftJoin(
-        schema.newsSources,
-        eq(schema.newsSources.id, schema.newsArticles.sourceId),
-      )
-      .where(
-        current === "all"
-          ? undefined
-          : eq(schema.newsArticles.status, current),
-      )
+      .leftJoin(schema.newsSources, eq(schema.newsSources.id, schema.newsArticles.sourceId))
+      .where(statusFilter)
       .orderBy(desc(schema.newsArticles.createdAt))
-      .limit(50),
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(schema.newsArticles)
+      .where(statusFilter),
   ])
 
   const countMap: Partial<Record<StatusFilterValue, number>> = {
@@ -76,11 +77,13 @@ export default async function AdminNewsPage({
   }
   for (const r of counts) countMap[r.status] = r.count
 
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
         title="News"
-        description="Rewritten items pulled from RSS + NewsAPI. Latest 50 shown."
+        description="Rewritten items pulled from RSS + NewsAPI."
       />
 
       <StatusFilter basePath="/admin/news" current={current} counts={countMap} />
@@ -141,6 +144,13 @@ export default async function AdminNewsPage({
           </Table>
         </div>
       )}
+
+      <SitePagination
+        basePath="/admin/news"
+        page={page}
+        totalPages={totalPages}
+        extraParams={{ status: current === "all" ? undefined : current }}
+      />
     </div>
   )
 }

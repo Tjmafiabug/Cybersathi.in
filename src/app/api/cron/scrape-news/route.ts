@@ -5,6 +5,8 @@ import { db, schema } from "@/lib/db"
 import { scrapeSource } from "@/lib/pipelines/news-scraper"
 import { failJob, finishJob, startJob } from "@/lib/pipelines/job-logger"
 
+const MAX_NEWS_PER_RUN = Number(process.env.MAX_NEWS_PER_SCRAPE_RUN ?? "10")
+
 export async function POST(req: NextRequest) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -23,6 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, itemsProcessed: 0 })
     }
 
+    const perSource = Math.max(1, Math.ceil(MAX_NEWS_PER_RUN / sources.length))
     const limit = pLimit(2)
     const errors: Array<{ message: string; stack?: string }> = []
     let itemsProcessed = 0
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
       sources.map((source) =>
         limit(async () => {
           try {
-            const count = await scrapeSource(source, categories)
+            const count = await scrapeSource(source, categories, perSource)
             itemsProcessed += count
           } catch (err) {
             const e = err instanceof Error ? err : new Error(String(err))

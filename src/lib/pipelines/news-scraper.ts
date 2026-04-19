@@ -2,6 +2,7 @@ import crypto from "crypto"
 import Parser from "rss-parser"
 import OpenAI from "openai"
 import slugify from "slugify"
+import { load } from "cheerio"
 import { eq } from "drizzle-orm"
 import { db, schema } from "@/lib/db"
 
@@ -38,12 +39,35 @@ function hashUrl(url: string): string {
   return crypto.createHash("md5").update(url).digest("hex")
 }
 
-function extractImageUrl(item: FeedItem): string | null {
+function extractImageFromFeed(item: FeedItem): string | null {
   const mc = item["media:content"]
   if (mc?.$?.url) return mc.$.url
   const enc = item.enclosure
   if (enc?.url && /\.(jpg|jpeg|png|webp|gif)/i.test(enc.url)) return enc.url
   return null
+}
+
+async function fetchOgImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(5000),
+      headers: { "User-Agent": "CyberSathi-Bot/1.0 (+https://cybersathi.in)" },
+    })
+    if (!res.ok) return null
+    const html = await res.text()
+    const $ = load(html)
+    return (
+      $('meta[property="og:image"]').attr("content") ??
+      $('meta[name="twitter:image"]').attr("content") ??
+      null
+    )
+  } catch {
+    return null
+  }
+}
+
+async function resolveImageUrl(item: FeedItem, articleUrl: string): Promise<string | null> {
+  return extractImageFromFeed(item) ?? fetchOgImage(articleUrl)
 }
 
 async function rewriteArticle(
@@ -87,11 +111,14 @@ Return JSON:
 export async function scrapeSource(
   source: SourceRow,
   categories: CategoryRow[],
+  maxItems: number,
 ): Promise<number> {
   const feed = await rssParser.parseURL(source.url)
   let inserted = 0
 
   for (const item of feed.items) {
+    if (inserted >= maxItems) break
+
     const url = item.link ?? item.guid
     if (!url) continue
 
@@ -104,7 +131,10 @@ export async function scrapeSource(
     if (existing) continue
 
     const rawContent = item.contentSnippet ?? item.content ?? item.title ?? ""
-    const draft = await rewriteArticle(item.title ?? "Untitled", rawContent, categories)
+    const [draft, imageUrl] = await Promise.all([
+      rewriteArticle(item.title ?? "Untitled", rawContent, categories),
+      resolveImageUrl(item, url),
+    ])
 
     const category =
       categories.find((c) => c.slug === draft.categorySlug) ?? categories[0]
@@ -121,7 +151,7 @@ export async function scrapeSource(
       sourceUrlHash: hash,
       sourcePublishedAt: item.pubDate ? new Date(item.pubDate) : null,
       categoryId: category.id,
-      imageUrl: extractImageUrl(item),
+      imageUrl,
       status: "pending_review",
       aiRewritten: 1,
     })

@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SitePagination } from "@/components/content/site-pagination"
 import { db, schema } from "@/lib/db"
 import { getAdminSession } from "@/lib/auth/dal"
 
@@ -24,26 +25,27 @@ import {
 import { BlogRowActions } from "./row-actions"
 
 export const dynamic = "force-dynamic"
-
 export const metadata = { title: "Blogs — Admin · CyberSathi" }
+
+const PAGE_SIZE = 25
 
 export default async function AdminBlogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; page?: string }>
 }) {
   const session = await getAdminSession()
   if (!session) return null
 
-  const { status: rawStatus } = await searchParams
+  const { status: rawStatus, page: pageRaw } = await searchParams
   const current = parseStatusParam(rawStatus)
+  const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1)
 
-  const [counts, rows] = await Promise.all([
+  const statusFilter = current === "all" ? undefined : eq(schema.blogs.status, current)
+
+  const [counts, rows, [{ total }]] = await Promise.all([
     db
-      .select({
-        status: schema.blogs.status,
-        count: sql<number>`count(*)::int`,
-      })
+      .select({ status: schema.blogs.status, count: sql<number>`count(*)::int` })
       .from(schema.blogs)
       .groupBy(schema.blogs.status),
     db
@@ -55,12 +57,16 @@ export default async function AdminBlogsPage({
         author: schema.blogs.author,
         aiGenerated: schema.blogs.aiGenerated,
         createdAt: schema.blogs.createdAt,
-        publishedAt: schema.blogs.publishedAt,
       })
       .from(schema.blogs)
-      .where(current === "all" ? undefined : eq(schema.blogs.status, current))
+      .where(statusFilter)
       .orderBy(desc(schema.blogs.createdAt))
-      .limit(50),
+      .limit(PAGE_SIZE)
+      .offset((page - 1) * PAGE_SIZE),
+    db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(schema.blogs)
+      .where(statusFilter),
   ])
 
   const countMap: Partial<Record<StatusFilterValue, number>> = {
@@ -68,12 +74,11 @@ export default async function AdminBlogsPage({
   }
   for (const r of counts) countMap[r.status] = r.count
 
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <PageHeader
-        title="Blogs"
-        description="Review and publish generated blog drafts. Latest 50 shown."
-      />
+      <PageHeader title="Blogs" description="Review and publish generated blog drafts." />
 
       <StatusFilter basePath="/admin/blogs" current={current} counts={countMap} />
 
@@ -104,9 +109,7 @@ export default async function AdminBlogsPage({
                     >
                       {r.title}
                     </Link>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      /{r.slug}
-                    </span>
+                    <span className="ml-2 text-xs text-muted-foreground">/{r.slug}</span>
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={r.status} />
@@ -129,6 +132,13 @@ export default async function AdminBlogsPage({
           </Table>
         </div>
       )}
+
+      <SitePagination
+        basePath="/admin/blogs"
+        page={page}
+        totalPages={totalPages}
+        extraParams={{ status: current === "all" ? undefined : current }}
+      />
     </div>
   )
 }
