@@ -3,7 +3,11 @@ import { eq } from "drizzle-orm"
 import { db, schema } from "@/lib/db"
 import { getCoverImage } from "./cover-image"
 
-const client = new OpenAI()
+let _openai: OpenAI | null = null
+function getOpenAI() {
+  _openai ??= new OpenAI()
+  return _openai
+}
 
 const SYSTEM_PROMPT = `You are a cybersecurity content writer for CyberSathi.in, an Indian cyber-crime awareness portal.
 Write factual, SEO-optimized content in plain English targeting Indian readers.
@@ -29,7 +33,7 @@ async function callOpenAI(
 ): Promise<BlogDraft> {
   const categoryList = categories.map((c) => `${c.slug}: ${c.name}`).join("\n")
 
-  const response = await client.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o",
     response_format: { type: "json_object" },
     messages: [
