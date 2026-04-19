@@ -439,6 +439,90 @@ export async function listAllCategories() {
   return db.select({ slug: schema.categories.slug }).from(schema.categories)
 }
 
+export async function getTagBySlug(slug: string) {
+  const [row] = await db
+    .select()
+    .from(schema.tags)
+    .where(eq(schema.tags.slug, slug))
+    .limit(1)
+  return row ?? null
+}
+
+export async function listAllTags() {
+  return db.select({ slug: schema.tags.slug }).from(schema.tags)
+}
+
+export async function listBlogsByTag(tagSlug: string) {
+  return db
+    .select({
+      id: schema.blogs.id,
+      slug: schema.blogs.slug,
+      title: schema.blogs.title,
+      metaDescription: schema.blogs.metaDescription,
+      coverImageUrl: schema.blogs.coverImageUrl,
+      author: schema.blogs.author,
+      publishedAt: schema.blogs.publishedAt,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.blogs)
+    .innerJoin(schema.blogTags, eq(schema.blogTags.blogId, schema.blogs.id))
+    .innerJoin(schema.tags, eq(schema.tags.id, schema.blogTags.tagId))
+    .leftJoin(schema.categories, eq(schema.categories.id, schema.blogs.categoryId))
+    .where(and(eq(schema.blogs.status, "published"), eq(schema.tags.slug, tagSlug)))
+    .orderBy(desc(schema.blogs.publishedAt))
+    .limit(24)
+}
+
+export async function listNewsByTag(tagSlug: string) {
+  return db
+    .select({
+      id: schema.newsArticles.id,
+      slug: schema.newsArticles.slug,
+      title: schema.newsArticles.title,
+      summary: schema.newsArticles.summary,
+      imageUrl: schema.newsArticles.imageUrl,
+      sourceUrl: schema.newsArticles.sourceUrl,
+      sourceName: schema.newsSources.name,
+      sourcePublishedAt: schema.newsArticles.sourcePublishedAt,
+      createdAt: schema.newsArticles.createdAt,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.newsArticles)
+    .innerJoin(schema.newsTags, eq(schema.newsTags.newsId, schema.newsArticles.id))
+    .innerJoin(schema.tags, eq(schema.tags.id, schema.newsTags.tagId))
+    .leftJoin(schema.categories, eq(schema.categories.id, schema.newsArticles.categoryId))
+    .leftJoin(schema.newsSources, eq(schema.newsSources.id, schema.newsArticles.sourceId))
+    .where(and(eq(schema.newsArticles.status, "published"), eq(schema.tags.slug, tagSlug)))
+    .orderBy(desc(sql`coalesce(${schema.newsArticles.sourcePublishedAt}, ${schema.newsArticles.createdAt})`))
+    .limit(24)
+}
+
+export async function listVideosByTag(tagSlug: string) {
+  return db
+    .select({
+      id: schema.videos.id,
+      slug: schema.videos.slug,
+      youtubeId: schema.videos.youtubeId,
+      title: schema.videos.title,
+      summary: schema.videos.summary,
+      channelName: schema.videos.channelName,
+      thumbnailUrl: schema.videos.thumbnailUrl,
+      durationSeconds: schema.videos.durationSeconds,
+      publishedAt: schema.videos.publishedAt,
+      categorySlug: schema.categories.slug,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.videos)
+    .innerJoin(schema.videoTags, eq(schema.videoTags.videoId, schema.videos.id))
+    .innerJoin(schema.tags, eq(schema.tags.id, schema.videoTags.tagId))
+    .leftJoin(schema.categories, eq(schema.categories.id, schema.videos.categoryId))
+    .where(and(eq(schema.videos.status, "published"), eq(schema.tags.slug, tagSlug)))
+    .orderBy(desc(sql`coalesce(${schema.videos.publishedAt}, ${schema.videos.createdAt})`))
+    .limit(24)
+}
+
 export async function listCategoriesWithCounts() {
   const rows = await db
     .select({

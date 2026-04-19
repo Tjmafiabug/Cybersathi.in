@@ -7,7 +7,7 @@ import { failJob, finishJob, startJob } from "@/lib/pipelines/job-logger"
 
 const MAX_BLOGS_PER_RUN = Number(process.env.MAX_BLOGS_PER_RUN ?? "3")
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   if (
     req.headers.get("Authorization") !==
     `Bearer ${process.env.CRON_SECRET}`

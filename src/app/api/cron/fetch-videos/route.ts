@@ -6,7 +6,7 @@ import { failJob, finishJob, startJob } from "@/lib/pipelines/job-logger"
 
 const MAX_VIDEOS_PER_RUN = Number(process.env.MAX_VIDEOS_PER_RUN ?? "5")
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
