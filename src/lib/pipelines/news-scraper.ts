@@ -50,17 +50,30 @@ function extractImageFromFeed(item: FeedItem): string | null {
 async function fetchOgImage(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, {
-      signal: AbortSignal.timeout(5000),
-      headers: { "User-Agent": "CyberSathi-Bot/1.0 (+https://cybersathi.in)" },
+      signal: AbortSignal.timeout(8000),
+      redirect: "follow",
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; CyberSathi-Bot/1.0)" },
     })
     if (!res.ok) return null
+
+    // If redirect landed back on google.com (e.g. Google News interstitial), skip
+    if (new URL(res.url).hostname.endsWith("google.com")) return null
+
     const html = await res.text()
     const $ = load(html)
-    return (
+    const img =
       $('meta[property="og:image"]').attr("content") ??
       $('meta[name="twitter:image"]').attr("content") ??
       null
-    )
+
+    if (!img) return null
+
+    // Resolve relative URLs
+    try {
+      return new URL(img, res.url).href
+    } catch {
+      return img
+    }
   } catch {
     return null
   }
