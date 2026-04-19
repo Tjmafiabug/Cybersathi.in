@@ -35,6 +35,20 @@ type ArticleDraft = {
   categorySlug: string
 }
 
+const CYBER_KEYWORDS = [
+  "cyber", "hack", "scam", "fraud", "phishing", "malware", "ransomware",
+  "breach", "data leak", "data theft", "identity theft", "upi", "otp",
+  "scammer", "cybercrime", "online fraud", "security", "vulnerability",
+  "exploit", "dark web", "trojan", "spyware", "botnet", "ddos",
+  "password", "credential", "deepfake", "sim swap", "vishing", "smishing",
+  "cryptocurrency scam", "investment scam", "tech support scam",
+]
+
+function isCyberRelated(title: string, content: string): boolean {
+  const text = `${title} ${content}`.toLowerCase()
+  return CYBER_KEYWORDS.some((kw) => text.includes(kw))
+}
+
 function hashUrl(url: string): string {
   return crypto.createHash("md5").update(url).digest("hex")
 }
@@ -144,6 +158,8 @@ export async function scrapeSource(
     if (existing) continue
 
     const rawContent = item.contentSnippet ?? item.content ?? item.title ?? ""
+    if (!isCyberRelated(item.title ?? "", rawContent)) continue
+
     const [draft, imageUrl] = await Promise.all([
       rewriteArticle(item.title ?? "Untitled", rawContent, categories),
       resolveImageUrl(item, url),
