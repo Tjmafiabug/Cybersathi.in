@@ -7,15 +7,25 @@ export function NewsletterCta() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "sent">("idle");
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email) return;
     setStatus("submitting");
-    // Placeholder — real wiring to Resend (or Supabase subscribers table) lands in a later milestone.
-    setTimeout(() => {
-      setStatus("sent");
-      setEmail("");
-    }, 400);
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        setStatus("sent");
+        setEmail("");
+      } else {
+        setStatus("idle");
+      }
+    } catch {
+      setStatus("idle");
+    }
   }
 
   return (

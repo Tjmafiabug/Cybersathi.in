@@ -6,7 +6,8 @@ import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { ContentBreadcrumb } from "@/components/content/content-breadcrumb"
 import { ShareRow } from "@/components/content/share-row"
-import { getVideoBySlug } from "@/lib/content/queries"
+import { JsonLd } from "@/components/seo/json-ld"
+import { getVideoBySlug, listAllPublishedSlugs } from "@/lib/content/queries"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -34,6 +35,11 @@ function formatTimestamp(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`
 }
 
+export async function generateStaticParams() {
+  const { videos } = await listAllPublishedSlugs()
+  return videos.map((v) => ({ slug: v.slug }))
+}
+
 export const revalidate = 600
 
 export default async function VideoDetailPage({ params }: Props) {
@@ -45,8 +51,21 @@ export default async function VideoDetailPage({ params }: Props) {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
   const shareUrl = `${siteUrl}/video/${video.slug}`
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: video.title,
+    description: video.summary ?? video.description ?? undefined,
+    thumbnailUrl: video.thumbnailUrl ?? undefined,
+    uploadDate: video.publishedAt?.toISOString(),
+    duration: video.durationSeconds ? `PT${video.durationSeconds}S` : undefined,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${video.youtubeId}`,
+    url: shareUrl,
+  }
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
+      <JsonLd data={jsonLd} />
       <ContentBreadcrumb
         crumbs={[
           { label: "Home", href: "/" },

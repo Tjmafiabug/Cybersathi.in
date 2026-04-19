@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MenuIcon, ShieldHalf } from "lucide-react";
+import { MenuIcon, SearchIcon, ShieldHalf } from "lucide-react";
 
 import {
   Accordion,
@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -107,6 +108,16 @@ export function Navbar() {
           </NavigationMenu>
 
           <div className="hidden items-center gap-3 lg:flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Search"
+              nativeButton={false}
+              render={<Link href="/search" />}
+            >
+              <SearchIcon className="h-4 w-4" />
+            </Button>
+            <ThemeToggle />
             <Button nativeButton={false} render={<Link href="#newsletter" />}>Subscribe</Button>
           </div>
 
@@ -164,6 +175,10 @@ export function Navbar() {
                 </div>
                 <div className="mt-6 flex flex-col gap-3">
                   <Button nativeButton={false} render={<Link href="#newsletter" />}>Subscribe</Button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Theme</span>
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
             </SheetContent>

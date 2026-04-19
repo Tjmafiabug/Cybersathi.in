@@ -7,12 +7,18 @@ import { NewsList } from "@/components/content/news-card"
 import { VideoGrid } from "@/components/content/video-card"
 import {
   getCategoryBySlug,
+  listAllCategories,
   listPublishedBlogs,
   listPublishedNews,
   listPublishedVideos,
 } from "@/lib/content/queries"
 
 type Props = { params: Promise<{ slug: string }> }
+
+export async function generateStaticParams() {
+  const categories = await listAllCategories()
+  return categories.map((c) => ({ slug: c.slug }))
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

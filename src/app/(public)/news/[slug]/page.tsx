@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ContentBreadcrumb } from "@/components/content/content-breadcrumb"
 import { ShareRow } from "@/components/content/share-row"
-import { getNewsBySlug } from "@/lib/content/queries"
+import { JsonLd } from "@/components/seo/json-ld"
+import { getNewsBySlug, listAllPublishedSlugs } from "@/lib/content/queries"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -29,6 +30,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  const { news } = await listAllPublishedSlugs()
+  return news.map((n) => ({ slug: n.slug }))
+}
+
 export const revalidate = 300
 
 export default async function NewsDetailPage({ params }: Props) {
@@ -42,8 +48,24 @@ export default async function NewsDetailPage({ params }: Props) {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
   const shareUrl = `${siteUrl}/news/${news.slug}`
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: news.title,
+    description: news.summary ?? undefined,
+    image: news.imageUrl ?? undefined,
+    datePublished: when.toISOString(),
+    url: shareUrl,
+    publisher: {
+      "@type": "Organization",
+      name: "CyberSathi",
+      url: siteUrl,
+    },
+  }
+
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
+      <JsonLd data={jsonLd} />
       <ContentBreadcrumb
         crumbs={[
           { label: "Home", href: "/" },

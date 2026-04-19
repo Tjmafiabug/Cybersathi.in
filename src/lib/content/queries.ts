@@ -359,6 +359,86 @@ export async function getCategoryBySlug(slug: string) {
   return row ?? null
 }
 
+export async function searchContent(query: string, limit = 20) {
+  const q = `%${query}%`
+  const [blogs, news, videos] = await Promise.all([
+    db
+      .select({
+        type: sql<"blog">`'blog'`,
+        slug: schema.blogs.slug,
+        title: schema.blogs.title,
+        excerpt: schema.blogs.metaDescription,
+        imageUrl: schema.blogs.coverImageUrl,
+        publishedAt: schema.blogs.publishedAt,
+      })
+      .from(schema.blogs)
+      .where(
+        and(
+          eq(schema.blogs.status, "published"),
+          sql`(${schema.blogs.title} ilike ${q} or ${schema.blogs.metaDescription} ilike ${q})`,
+        ),
+      )
+      .orderBy(desc(schema.blogs.publishedAt))
+      .limit(limit),
+    db
+      .select({
+        type: sql<"news">`'news'`,
+        slug: schema.newsArticles.slug,
+        title: schema.newsArticles.title,
+        excerpt: schema.newsArticles.summary,
+        imageUrl: schema.newsArticles.imageUrl,
+        publishedAt: schema.newsArticles.sourcePublishedAt,
+      })
+      .from(schema.newsArticles)
+      .where(
+        and(
+          eq(schema.newsArticles.status, "published"),
+          sql`(${schema.newsArticles.title} ilike ${q} or ${schema.newsArticles.summary} ilike ${q})`,
+        ),
+      )
+      .orderBy(desc(schema.newsArticles.sourcePublishedAt))
+      .limit(limit),
+    db
+      .select({
+        type: sql<"video">`'video'`,
+        slug: schema.videos.slug,
+        title: schema.videos.title,
+        excerpt: schema.videos.summary,
+        imageUrl: schema.videos.thumbnailUrl,
+        publishedAt: schema.videos.publishedAt,
+      })
+      .from(schema.videos)
+      .where(
+        and(
+          eq(schema.videos.status, "published"),
+          sql`(${schema.videos.title} ilike ${q} or ${schema.videos.summary} ilike ${q})`,
+        ),
+      )
+      .orderBy(desc(schema.videos.publishedAt))
+      .limit(limit),
+  ])
+  return [...blogs, ...news, ...videos]
+    .sort((a, b) => {
+      const ta = a.publishedAt?.getTime() ?? 0
+      const tb = b.publishedAt?.getTime() ?? 0
+      return tb - ta
+    })
+    .slice(0, limit)
+}
+
+export async function listAllPublishedSlugs() {
+  const [blogs, news, videos] = await Promise.all([
+    db.select({ slug: schema.blogs.slug }).from(schema.blogs).where(eq(schema.blogs.status, "published")),
+    db.select({ slug: schema.newsArticles.slug }).from(schema.newsArticles).where(eq(schema.newsArticles.status, "published")),
+    db.select({ slug: schema.videos.slug }).from(schema.videos).where(eq(schema.videos.status, "published")),
+  ])
+  return { blogs, news, videos }
+}
+
+export async function listAllCategories() {
+  return db.select({ slug: schema.categories.slug }).from(schema.categories)
+}
+
 export async function listCategoriesWithCounts() {
   const rows = await db
     .select({
