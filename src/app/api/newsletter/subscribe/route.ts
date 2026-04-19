@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { db, schema } from "@/lib/db"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend() {
+  _resend ??= new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
 const FROM = "CyberSathi <newsletter@cybersathi.in>"
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://cybersathi.in"
 
@@ -29,7 +33,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM,
       to: email,
       subject: "Welcome to CyberSathi — you're subscribed",
