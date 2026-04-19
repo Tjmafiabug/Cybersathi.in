@@ -1,0 +1,74 @@
+name: Content Pipeline
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # scrape news  — 2am UTC
+    - cron: '0 3 * * *'   # generate blogs — 3am UTC
+    - cron: '0 4 * * *'   # fetch videos  — 4am UTC
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - scrape-news
+          - generate-blogs
+          - fetch-videos
+
+jobs:
+  scrape-news:
+    name: Scrape News
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'scrape-news') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 2 * * *'
+    steps:
+      - name: Trigger
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://cybersathi.in/api/cron/scrape-news)
+          body=$(echo "$response" | head -n -1)
+          code=$(echo "$response" | tail -n 1)
+          echo "Status: $code"
+          echo "Body: $body"
+          [ "$code" = "200" ] || exit 1
+
+  generate-blogs:
+    name: Generate Blogs
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'generate-blogs') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 3 * * *'
+    steps:
+      - name: Trigger
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://cybersathi.in/api/cron/generate-blogs)
+          body=$(echo "$response" | head -n -1)
+          code=$(echo "$response" | tail -n 1)
+          echo "Status: $code"
+          echo "Body: $body"
+          [ "$code" = "200" ] || exit 1
+
+  fetch-videos:
+    name: Fetch Videos
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'fetch-videos') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 4 * * *'
+    steps:
+      - name: Trigger
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://cybersathi.in/api/cron/fetch-videos)
+          body=$(echo "$response" | head -n -1)
+          code=$(echo "$response" | tail -n 1)
+          echo "Status: $code"
+          echo "Body: $body"
+          [ "$code" = "200" ] || exit 1
