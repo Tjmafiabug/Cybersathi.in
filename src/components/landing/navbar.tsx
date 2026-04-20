@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { MenuIcon, SearchIcon, ShieldHalf } from "lucide-react";
 
@@ -38,6 +39,8 @@ const topics = [
 ];
 
 export function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMobile = () => setMobileOpen(false);
   return (
     <header className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -121,7 +124,7 @@ export function Navbar() {
             <Button nativeButton={false} render={<Link href="#newsletter" />}>Subscribe</Button>
           </div>
 
-          <Sheet>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger
               render={
                 <Button variant="outline" size="icon" aria-label="Open menu" />
@@ -133,7 +136,7 @@ export function Navbar() {
             <SheetContent side="top" className="max-h-screen overflow-auto">
               <SheetHeader>
                 <SheetTitle>
-                  <Link href="/" className="flex items-center gap-2">
+                  <Link href="/" onClick={closeMobile} className="flex items-center gap-2">
                     <ShieldHalf className="h-6 w-6 text-primary" aria-hidden />
                     <span className="text-lg font-semibold tracking-tight">
                       CyberSathi
@@ -153,6 +156,7 @@ export function Navbar() {
                           <Link
                             href={topic.href}
                             key={topic.title}
+                            onClick={closeMobile}
                             className="rounded-md p-3 transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation"
                           >
                             <p className="mb-1 font-semibold text-foreground">
@@ -168,13 +172,13 @@ export function Navbar() {
                   </AccordionItem>
                 </Accordion>
                 <div className="flex flex-col gap-1 py-2">
-                  <Link href="/blog" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Blog</Link>
-                  <Link href="/news" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">News</Link>
-                  <Link href="/videos" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Videos</Link>
-                  <Link href="/about" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">About</Link>
+                  <Link href="/blog" onClick={closeMobile} className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Blog</Link>
+                  <Link href="/news" onClick={closeMobile} className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">News</Link>
+                  <Link href="/videos" onClick={closeMobile} className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Videos</Link>
+                  <Link href="/about" onClick={closeMobile} className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">About</Link>
                 </div>
                 <div className="mt-6 flex flex-col gap-3">
-                  <Button nativeButton={false} render={<Link href="#newsletter" />}>Subscribe</Button>
+                  <Button nativeButton={false} render={<Link href="#newsletter" onClick={closeMobile} />}>Subscribe</Button>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Theme</span>
                     <ThemeToggle />
