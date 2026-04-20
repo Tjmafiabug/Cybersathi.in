@@ -153,7 +153,7 @@ export function Navbar() {
                           <Link
                             href={topic.href}
                             key={topic.title}
-                            className="rounded-md p-3 transition-colors hover:bg-muted/70"
+                            className="rounded-md p-3 transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation"
                           >
                             <p className="mb-1 font-semibold text-foreground">
                               {topic.title}
@@ -167,11 +167,11 @@ export function Navbar() {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-                <div className="flex flex-col gap-6 py-2">
-                  <Link href="/blog" className="font-medium">Blog</Link>
-                  <Link href="/news" className="font-medium">News</Link>
-                  <Link href="/videos" className="font-medium">Videos</Link>
-                  <Link href="/about" className="font-medium">About</Link>
+                <div className="flex flex-col gap-1 py-2">
+                  <Link href="/blog" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Blog</Link>
+                  <Link href="/news" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">News</Link>
+                  <Link href="/videos" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">Videos</Link>
+                  <Link href="/about" className="rounded-md px-3 py-3 font-medium transition-colors hover:bg-muted/70 active:bg-muted touch-manipulation">About</Link>
                 </div>
                 <div className="mt-6 flex flex-col gap-3">
                   <Button nativeButton={false} render={<Link href="#newsletter" />}>Subscribe</Button>
