@@ -19,5 +19,7 @@ export async function setNewsStatus(id: string, status: ContentStatus) {
 
   revalidatePath("/admin/news")
   revalidatePath("/admin")
+  revalidatePath("/")
+  revalidatePath("/news")
   return { ok: true }
 }
