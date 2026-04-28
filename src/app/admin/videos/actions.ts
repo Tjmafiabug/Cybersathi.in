@@ -12,9 +12,20 @@ export async function setVideoStatus(id: string, status: ContentStatus) {
   const session = await getAdminSession()
   if (!session) return { error: "Not authorized." }
 
+  const current = await db.query.videos.findFirst({
+    where: eq(schema.videos.id, id),
+    columns: { publishedAt: true },
+  })
+  if (!current) return { error: "Video not found." }
+
+  const now = new Date()
   await db
     .update(schema.videos)
-    .set({ status })
+    .set({
+      status,
+      publishedAt:
+        status === "published" ? (current.publishedAt ?? now) : current.publishedAt,
+    })
     .where(eq(schema.videos.id, id))
 
   revalidatePath("/admin/videos")
