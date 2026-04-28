@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { asc, eq } from "drizzle-orm"
+import { asc, count, eq } from "drizzle-orm"
 import pLimit from "p-limit"
 import { db, schema } from "@/lib/db"
 import { scrapeSource } from "@/lib/pipelines/news-scraper"
 import { failJob, finishJob, startJob } from "@/lib/pipelines/job-logger"
 
 const MAX_NEWS_PER_RUN = Number(process.env.MAX_NEWS_PER_SCRAPE_RUN ?? "10")
+const PENDING_NEWS_LIMIT = Number(process.env.PENDING_NEWS_LIMIT ?? "50")
 
 export async function GET(req: NextRequest) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -15,6 +16,20 @@ export async function GET(req: NextRequest) {
   const jobId = await startJob("scrape_news")
 
   try {
+    const [{ pendingCount }] = await db
+      .select({ pendingCount: count() })
+      .from(schema.newsArticles)
+      .where(eq(schema.newsArticles.status, "pending_review"))
+
+    if (pendingCount >= PENDING_NEWS_LIMIT) {
+      await finishJob(jobId, 0)
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: `${pendingCount} news articles pending review — clear queue first (limit: ${PENDING_NEWS_LIMIT})`,
+      })
+    }
+
     const [sources, categories] = await Promise.all([
       db.select().from(schema.newsSources).where(eq(schema.newsSources.active, true)),
       db.select().from(schema.categories).orderBy(asc(schema.categories.sortOrder)),

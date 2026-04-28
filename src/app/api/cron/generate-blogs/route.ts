@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { and, asc, eq, isNull, or } from "drizzle-orm"
+import { and, asc, count, eq, isNull, or } from "drizzle-orm"
 import pLimit from "p-limit"
 import { db, schema } from "@/lib/db"
 import { generateBlog } from "@/lib/pipelines/blog-generator"
 import { failJob, finishJob, startJob } from "@/lib/pipelines/job-logger"
 
 const MAX_BLOGS_PER_RUN = Number(process.env.MAX_BLOGS_PER_RUN ?? "3")
+const PENDING_BLOG_LIMIT = Number(process.env.PENDING_BLOG_LIMIT ?? "20")
 
 export async function GET(req: NextRequest) {
   if (
@@ -18,6 +19,20 @@ export async function GET(req: NextRequest) {
   const jobId = await startJob("generate_blogs")
 
   try {
+    const [{ pendingCount }] = await db
+      .select({ pendingCount: count() })
+      .from(schema.blogs)
+      .where(eq(schema.blogs.status, "pending_review"))
+
+    if (pendingCount >= PENDING_BLOG_LIMIT) {
+      await finishJob(jobId, 0)
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: `${pendingCount} blogs pending review — clear queue first (limit: ${PENDING_BLOG_LIMIT})`,
+      })
+    }
+
     const [topics, categories] = await Promise.all([
       db
         .select()

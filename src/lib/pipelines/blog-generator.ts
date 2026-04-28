@@ -9,6 +9,8 @@ function getOpenAI() {
   return _openai
 }
 
+const BLOG_MODEL = "gpt-4o-mini"
+
 const SYSTEM_PROMPT = `You are a cybersecurity content writer for CyberSathi.in, an Indian cyber-crime awareness portal.
 Write factual, SEO-optimized content in plain English targeting Indian readers.
 Never give legal advice. Always maintain a helpful, educational tone.
@@ -34,7 +36,7 @@ async function callOpenAI(
   const categoryList = categories.map((c) => `${c.slug}: ${c.name}`).join("\n")
 
   const response = await getOpenAI().chat.completions.create({
-    model: "gpt-4o",
+    model: BLOG_MODEL,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -106,7 +108,7 @@ export async function generateBlog(
       categoryId: category.id,
       status: "pending_review",
       aiGenerated: 1,
-      aiModel: "gpt-4o",
+      aiModel: BLOG_MODEL,
       aiPromptVersion: "blog-v1.0",
     })
     .returning({ id: schema.blogs.id })
