@@ -31,5 +31,7 @@ export async function setBlogStatus(id: string, status: ContentStatus) {
 
   revalidatePath("/admin/blogs")
   revalidatePath("/admin")
+  revalidatePath("/")
+  revalidatePath("/blog")
   return { ok: true }
 }

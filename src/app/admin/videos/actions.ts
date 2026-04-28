@@ -19,5 +19,7 @@ export async function setVideoStatus(id: string, status: ContentStatus) {
 
   revalidatePath("/admin/videos")
   revalidatePath("/admin")
+  revalidatePath("/")
+  revalidatePath("/videos")
   return { ok: true }
 }
