@@ -125,10 +125,7 @@ export async function fetchVideos(
     const bi = info.basic_info
 
     const title = bi.title ?? r.title?.toString() ?? "Untitled"
-    const thumbnailUrl =
-      bi.thumbnail?.[0]?.url ??
-      (r.thumbnails as Array<{ url: string }> | undefined)?.[0]?.url ??
-      null
+    const thumbnailUrl = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
 
     const transcript = await fetchTranscript(youtubeId)
 
