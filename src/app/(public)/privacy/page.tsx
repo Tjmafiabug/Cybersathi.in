@@ -19,8 +19,8 @@ export default function PrivacyPage() {
             subscription date. We use this only to send the weekly digest.
           </li>
           <li>
-            <strong>Analytics</strong> — anonymised page-view data via Vercel
-            Analytics. No cookies are set. No personal data is stored.
+            <strong>Analytics</strong> — anonymised page-view data (no cookies,
+            no personal data stored).
           </li>
           <li>
             <strong>Server logs</strong> — standard HTTP request logs retained
