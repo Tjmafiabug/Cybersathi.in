@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Play } from "lucide-react"
@@ -35,8 +38,13 @@ export function VideoCard({
   className?: string
 }) {
   const duration = formatDuration(video.durationSeconds)
-  const thumb =
-    video.thumbnailUrl ?? `https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`
+  const thumbFallbacks = [
+    video.thumbnailUrl ?? `https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`,
+    `https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`,
+    `https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`,
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&auto=format&fit=crop&q=60",
+  ]
+  const [thumbIdx, setThumbIdx] = useState(0)
 
   return (
     <article
@@ -50,11 +58,12 @@ export function VideoCard({
         className="relative block aspect-video overflow-hidden rounded-xl border border-border bg-muted"
       >
         <Image
-          src={thumb}
+          src={thumbFallbacks[thumbIdx]}
           alt={video.title}
           fill
           sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setThumbIdx((i) => Math.min(i + 1, thumbFallbacks.length - 1))}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent opacity-80" />
         <div className="absolute inset-0 flex items-center justify-center">

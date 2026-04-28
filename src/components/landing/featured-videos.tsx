@@ -27,12 +27,26 @@ function VideoThumbnail({
   src: string;
   duration: string;
 }) {
+  const fallbacks = [
+    src.replace(/\/[^/?]+\.jpg[^"]*$/, "/hqdefault.jpg"),
+    src.replace(/\/[^/?]+\.jpg[^"]*$/, "/mqdefault.jpg"),
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&h=750&auto=format&fit=crop&q=60",
+  ];
+
   return (
     <div className="relative overflow-hidden rounded-xl bg-muted">
       <img
         src={src}
         alt=""
         className="aspect-video w-full object-cover transition duration-500 group-hover:scale-105"
+        onError={(e) => {
+          const img = e.currentTarget;
+          const tried = parseInt(img.dataset.fallback ?? "0", 10);
+          if (tried < fallbacks.length) {
+            img.dataset.fallback = String(tried + 1);
+            img.src = fallbacks[tried];
+          }
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       <div className="absolute inset-0 flex items-center justify-center">
